@@ -8,8 +8,6 @@ ctypedef fused my_type:
     float
     double
 
-@cython.boundscheck(False)
-@cython.wraparound(False)
 def _redtoreg2(long nlons, my_type[:] redgrid_data, long[:] lonsperlat, my_type missval):
     cdef long npts = redgrid_data.shape[0]
     cdef long nlats = lonsperlat.shape[0]
