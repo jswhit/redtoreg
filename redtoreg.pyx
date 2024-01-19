@@ -8,7 +8,7 @@ ctypedef fused my_type:
     float
     double
 
-def _redtoreg(long nlons, my_type[:] redgrid_data, long[:] lonsperlat, my_type missval):
+def _redtoreg(cython.Py_ssize_t nlons, my_type[:] redgrid_data, long[:] lonsperlat, my_type missval):
     cdef cython.Py_ssize_t nlats = lonsperlat.shape[0]
     cdef cython.Py_ssize_t i,j,n,indx,ilons,im,ip
     cdef my_type zxi, zdx, flons, missvl
