@@ -6,7 +6,7 @@ import time
 
 nc = Dataset('test.nc')
 q = nc['q'][:]
-print(q.shape)
+print(q.shape, q.min(), q.max())
 
 lats = nc['latitude']
 lats_distinct = np.unique(lats)
