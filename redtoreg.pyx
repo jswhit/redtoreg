@@ -8,7 +8,7 @@ ctypedef fused my_type:
     float
     double
 
-def _redtoreg2(long nlons, my_type[:] redgrid_data, long[:] lonsperlat, my_type missval):
+def _redtoreg(long nlons, my_type[:] redgrid_data, long[:] lonsperlat, my_type missval):
     cdef long npts = redgrid_data.shape[0]
     cdef long nlats = lonsperlat.shape[0]
     cdef long i,j,n,indx,ilons,im,ip
@@ -53,7 +53,7 @@ def redtoreg(redgrid_data, lonsperlat, missval=None):
     If any values equal to specified missing value (``missval``, default NaN), a masked array is returned."""
     if missval is None:
         missval = np.nan
-    datarr = _redtoreg2(lonsperlat.max(),redgrid_data,lonsperlat,missval)
+    datarr = _redtoreg(lonsperlat.max(),redgrid_data,lonsperlat,missval)
     if np.count_nonzero(datarr==missval):
         datarr = ma.masked_values(datarr, missval)
     return datarr
