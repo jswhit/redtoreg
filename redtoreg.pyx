@@ -2,6 +2,7 @@ cimport numpy as npc
 from numpy import ma
 import numpy as np
 npc.import_array()
+cimport cython
 
 cdef extern from "numpy/arrayobject.h":
     ctypedef int npy_intp
@@ -15,59 +16,80 @@ cdef extern from "numpy/arrayobject.h":
     npy_intp PyArray_ISCONTIGUOUS(ndarray arr)
     npy_intp PyArray_ISALIGNED(ndarray arr)
 
-def _redtoreg(object nlonsin, npc.ndarray lonsperlat, npc.ndarray redgrid, \
-              object missval):
-    """
-    convert data on global reduced gaussian to global
-    full gaussian grid using linear interpolation.
-    """
-    cdef long i, j, n, im, ip, indx, ilons, nlats, npts
+ctypedef fused my_type:
+    float
+    double
+
+# new version
+@cython.boundscheck(False)
+@cython.wraparound(False)
+def _redtoreg2(long nlons, my_type[:] redgrid_data, long[:] lonsperlat, double missval):
+    cdef long npts = redgrid_data.shape[0]
+    cdef long nlats = lonsperlat.shape[0]
+    cdef long i,j,n,indx,ilons,im,ip
     cdef double zxi, zdx, flons, missvl
-    cdef npc.ndarray reggrid
-    cdef double *redgrdptr
-    cdef double *reggrdptr
-    cdef long *lonsptr
-    nlons = nlonsin
-    nlats = len(lonsperlat)
-    npts = len(redgrid)
-    if lonsperlat.sum() != npts:
-        msg='size of reduced grid does not match number of data values'
-        raise ValueError(msg)
-    reggrid = missval*np.ones((nlats,nlons),np.double)
-    # get data buffers and cast to desired type.
-    lonsptr = <long *>lonsperlat.data
-    redgrdptr = <double *>redgrid.data
-    reggrdptr = <double *>reggrid.data
-    missvl = <double>missval
-    # iterate over full grid, do linear interpolation.
-    n = 0
+    if my_type is float:
+        dtype = np.float32
+    elif my_type is double:
+        dtype = np.double
+    reggrid_data = np.empty((nlats, nlons), dtype)
     indx = 0
-    for j from 0 <= j < nlats:
-        ilons = lonsptr[j]
+    for j in range(nlats):
+        ilons = lonsperlat[j]
         flons = <double>ilons
-        for i from 0 <= i < nlons:
+        for i in range(nlons):
             # zxi is the grid index (relative to the reduced grid)
             # of the i'th point on the full grid.
             zxi = i * flons / nlons # goes from 0 to ilons
             im = <long>zxi
             zdx = zxi - <double>im
-            if ilons != 0:
+            im = (im + ilons)%ilons
+            ip = (im + 1 + ilons)%ilons
+            # if one of the nearest values is missing, use nearest
+            # neighbor interpolation.
+            if redgrid_data[indx+im] == missval or\
+               redgrid_data[indx+ip] == missval: 
+                if zdx < 0.5:
+                    reggrid_data[j,i] = redgrid_data[indx+im]
+                else:
+                    reggrid_data[j,i] = redgrid_data[indx+ip]
+            else: # linear interpolation.
+                reggrid_data[j,i] = redgrid_data[indx+im]*(1.-zdx) +\
+                                    redgrid_data[indx+ip]*zdx
+        indx = indx + ilons
+    return reggrid_data
+
+# for 3d arrays
+@cython.boundscheck(False)
+@cython.wraparound(False)
+def _redtoreg3(long nlons, my_type[:,::1] redgrid_data, long[:] lonsperlat):
+    cdef long nlevs = redgrid_data.shape[0]
+    cdef long npts = redgrid_data.shape[1]
+    cdef long nlats = lonsperlat.shape[0]
+    cdef long i,j,n,indx,ilons,im,ip
+    cdef double zxi, zdx, flons, missvl
+    if my_type is float:
+        dtype = np.float32
+    elif my_type is double:
+        dtype = np.double
+    reggrid_data = np.empty((nlevs, nlats, nlons), dtype)
+    for k in range(nlevs):
+        indx = 0
+        for j in range(nlats):
+            ilons = lonsperlat[j]
+            flons = <double>ilons
+            for i in range(nlons):
+                # zxi is the grid index (relative to the reduced grid)
+                # of the i'th point on the full grid.
+                zxi = i * flons / nlons # goes from 0 to ilons
+                im = <long>zxi
+                zdx = zxi - <double>im
                 im = (im + ilons)%ilons
                 ip = (im + 1 + ilons)%ilons
-                # if one of the nearest values is missing, use nearest
-                # neighbor interpolation.
-                if redgrdptr[indx+im] == missvl or\
-                   redgrdptr[indx+ip] == missvl: 
-                    if zdx < 0.5:
-                        reggrdptr[n] = redgrdptr[indx+im]
-                    else:
-                        reggrdptr[n] = redgrdptr[indx+ip]
-                else: # linear interpolation.
-                    reggrdptr[n] = redgrdptr[indx+im]*(1.-zdx) +\
-                                   redgrdptr[indx+ip]*zdx
-            n = n + 1
-        indx = indx + ilons
-    return reggrid
+                reggrid_data[k,j,i] = redgrid_data[k,indx+im]*(1.-zdx) +\
+                                      redgrid_data[k,indx+ip]*zdx
+            indx = indx + ilons
+    return reggrid_data
 
 def redtoreg(redgrid_data, lonsperlat, missval=None):
     """
@@ -78,7 +100,7 @@ def redtoreg(redgrid_data, lonsperlat, missval=None):
     If any values equal to specified missing value (``missval``, default NaN), a masked array is returned."""
     if missval is None:
         missval = np.nan
-    datarr = _redtoreg(lonsperlat.max(),lonsperlat,redgrid_data.astype(np.float64),missval)
+    datarr = _redtoreg2(lonsperlat.max(),redgrid_data,lonsperlat,missval)
     if np.count_nonzero(datarr==missval):
         datarr = ma.masked_values(datarr, missval)
     return datarr

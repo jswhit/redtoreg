@@ -1,10 +1,10 @@
 from netCDF4 import Dataset
-from redtoreg import redtoreg
+from redtoreg import redtoreg, _redtoreg3
 import numpy as np
 import time
 
 nc = Dataset('test.nc')
-q = nc['q'][:].astype(np.float64)
+q = nc['q'][:]
 print(q.shape)
 lats = nc['latitude']
 lats_distinct = np.unique(lats)
@@ -13,9 +13,19 @@ lonsperlat = np.empty(nlats, int)
 for j in range(nlats):
     lonsperlat[j] = np.isclose(lats, lats_distinct[j]).sum()
 print(lonsperlat)
-for nlev in range(q.shape[0]):
-    start = time.time()
-    qq = redtoreg(q[nlev],lonsperlat)
-    end = time.time()
-    elapsed = end-start
-    print('time in redtoreg for level %s = %s' % (nlev,elapsed))
+nlons = lonsperlat.max()
+nlevs = q.shape[0]
+qq = np.empty((nlevs,nlats,nlons), q.dtype)
+start = time.time()
+for k in range(nlevs):
+    qq[k] = redtoreg(q[k],lonsperlat)
+end = time.time()
+elapsed = end-start
+print('time in redtoreg2 =',elapsed)
+print(qq.shape, qq.min(), qq.max())
+start = time.time()
+qq = _redtoreg3(nlons, q, lonsperlat)
+end = time.time()
+elapsed = end-start
+print('time in redtoreg3 = ',elapsed)
+print(qq.shape, qq.min(), qq.max())
