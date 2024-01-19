@@ -1,5 +1,5 @@
 from netCDF4 import Dataset
-from redtoreg import redtoreg, _redtoreg3
+from redtoreg import redtoreg
 import numpy as np
 import time
 
@@ -22,10 +22,4 @@ for k in range(nlevs):
 end = time.time()
 elapsed = end-start
 print('time in redtoreg2 =',elapsed)
-print(qq.shape, qq.min(), qq.max())
-start = time.time()
-qq = _redtoreg3(nlons, q, lonsperlat)
-end = time.time()
-elapsed = end-start
-print('time in redtoreg3 = ',elapsed)
 print(qq.shape, qq.min(), qq.max())
