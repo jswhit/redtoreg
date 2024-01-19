@@ -17,6 +17,7 @@ def _redtoreg(long nlons, my_type[:] redgrid_data, long[:] lonsperlat, my_type m
     elif my_type is double:
         dtype = np.double
     reggrid_data = np.empty((nlats, nlons), dtype)
+    cdef my_type[:, ::1] reggrid_data_view = reggrid_data
     indx = 0
     for j in range(nlats):
         ilons = lonsperlat[j]
@@ -34,11 +35,11 @@ def _redtoreg(long nlons, my_type[:] redgrid_data, long[:] lonsperlat, my_type m
             if redgrid_data[indx+im] == missval or\
                redgrid_data[indx+ip] == missval: 
                 if zdx < 0.5:
-                    reggrid_data[j,i] = redgrid_data[indx+im]
+                    reggrid_data_view[j,i] = redgrid_data[indx+im]
                 else:
-                    reggrid_data[j,i] = redgrid_data[indx+ip]
+                    reggrid_data_view[j,i] = redgrid_data[indx+ip]
             else: # linear interpolation.
-                reggrid_data[j,i] = redgrid_data[indx+im]*(1.-zdx) +\
+                reggrid_data_view[j,i] = redgrid_data[indx+im]*(1.-zdx) +\
                                     redgrid_data[indx+ip]*zdx
         indx = indx + ilons
     return reggrid_data
