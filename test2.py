@@ -26,5 +26,5 @@ for k in range(nlevs):
 end = time.time()
 elapsed = end-start
 
-print('time in redtoreg2 =',elapsed)
+print('time in redtoreg =',elapsed)
 print(qq.shape, qq.min(), qq.max())
