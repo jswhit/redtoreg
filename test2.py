@@ -1,3 +1,4 @@
+# speed test
 from netCDF4 import Dataset
 from redtoreg import redtoreg
 import numpy as np
