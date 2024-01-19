@@ -40,7 +40,7 @@ def _redtoreg(cython.Py_ssize_t nlons, my_type[:] redgrid_data, long[:] lonsperl
                     reggrid_data_view[j,i] = redgrid_data[indx+ip]
             else: # linear interpolation.
                 reggrid_data_view[j,i] = redgrid_data[indx+im]*(1.-zdx) +\
-                                    redgrid_data[indx+ip]*zdx
+                                         redgrid_data[indx+ip]*zdx
         indx = indx + ilons
     return reggrid_data
 
@@ -51,6 +51,7 @@ def redtoreg(redgrid_data, lonsperlat, missval=None):
     Takes 1-d array on ECMWF reduced gaussian grid (``redgrid_data``), linearly interpolates to corresponding
     regular gaussian grid (given by ``lonsperlat`` array, with max(lonsperlat) longitudes).
     If any values equal to specified missing value (``missval``, default NaN), a masked array is returned."""
+
     if missval is None:
         missval = np.nan
     datarr = _redtoreg(lonsperlat.max(),redgrid_data,lonsperlat,missval)
