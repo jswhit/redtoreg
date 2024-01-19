@@ -1,4 +1,5 @@
 # validate with missing values, compare with pygrib implementation
+# (requires pygrib)
 import pygrib
 import numpy as np
 from redtoreg import redtoreg
