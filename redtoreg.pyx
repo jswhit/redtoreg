@@ -26,7 +26,7 @@ def _redtoreg(cython.Py_ssize_t nlons, my_type[:] redgrid_data, long[:] lonsperl
             # zxi is the grid index (relative to the reduced grid)
             # of the i'th point on the full grid.
             zxi = i * flons / nlons # goes from 0 to ilons
-            im = zxi; zdx = zxi - im
+            im = <cython.Py_ssize_t>zxi; zdx = zxi - im
             im = (im + ilons)%ilons
             ip = (im + 1 + ilons)%ilons
             # if one of the nearest values is missing, use nearest
