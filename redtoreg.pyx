@@ -4,11 +4,11 @@ import numpy as np
 npc.import_array()
 cimport cython
 
-ctypedef fused my_type:
+ctypedef fused float_type:
     float
     double
 
-def redtoreg(my_type[:] redgrid_data, long[:] lonsperlat, missval=None):
+def redtoreg(float_type[:] redgrid_data, long[:] lonsperlat, missval=None):
     """
     redtoreg(redgrid_data, lonsperlat, missval=None)
 
@@ -18,10 +18,10 @@ def redtoreg(my_type[:] redgrid_data, long[:] lonsperlat, missval=None):
 
     cdef cython.Py_ssize_t nlats = lonsperlat.shape[0]
     cdef cython.Py_ssize_t i,j,n,indx,ilons,im,ip,nlons
-    cdef my_type zxi, zdx, flons, missvalc
-    if my_type is float:
+    cdef float_type zxi, zdx, flons, missvalc
+    if float_type is float:
         dtype = np.float32
-    elif my_type is double:
+    elif float_type is double:
         dtype = np.double
     nlons = np.max(lonsperlat)
     if missval is None:
@@ -29,7 +29,7 @@ def redtoreg(my_type[:] redgrid_data, long[:] lonsperlat, missval=None):
     else:
         missvalc = missval
     reggrid_data = np.empty((nlats, nlons), dtype)
-    cdef my_type[:, ::1] reggrid_data_view = reggrid_data
+    cdef float_type[:, ::1] reggrid_data_view = reggrid_data
     indx = 0
     for j in range(nlats):
         ilons = lonsperlat[j]
