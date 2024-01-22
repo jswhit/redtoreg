@@ -12,6 +12,8 @@ except: # grab data from google cloud and cache locally
     ds_era5t=xr.open_zarr("gs://gcp-public-data-arco-era5/co/model-level-moisture.zarr-v2",consolidated=True,)
     da = ds_era5t['q'][-1,...]
     da.to_netcdf('test.nc')
+    ds_era5t.close()
+    nc = Dataset('test.nc') # data already cached locally
 
 q = nc['q'][:]
 print(q.shape, q.min(), q.max())
