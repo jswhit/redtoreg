@@ -11,10 +11,14 @@ def redtoreg(float_type[:] redgrid_data, long[:] lonsperlat, missval=None):
     """
     redtoreg(redgrid_data, lonsperlat, missval=None)
 
-    Takes 1-d array on ECMWF reduced gaussian grid (redgrid_data), linearly interpolates to corresponding
-    regular gaussian grid.  Reduced gaussian grid defined by lonsperlat array, regular gaussian
+    Takes 1-d array on ECMWF reduced gaussian grid (redgrid_data), linearly interpolates
+    to corresponding regular gaussian grid.
+
+    Reduced gaussian grid defined by lonsperlat array, regular gaussian
     grid has the same number of latitudes and max(lonsperlat) longitudes.
-    Includes handling of missing values using nearest neighbor interpolation."""
+
+    Includes handling of missing values using nearest neighbor interpolation.
+    """
 
     cdef cython.Py_ssize_t nlats = lonsperlat.shape[0]
     cdef cython.Py_ssize_t i,j,n,indx,ilons,im,ip,nlons
