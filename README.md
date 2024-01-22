@@ -6,7 +6,7 @@ but after that data will be cached data locally in `test.nc`).
 
 
 ```python
-def redtoreg(redgrid_data, onsperlat, missval=None):
+def redtoreg(redgrid_data, lonsperlat, missval=None):
     """
     redtoreg(redgrid_data, lonsperlat, missval=None)
 
