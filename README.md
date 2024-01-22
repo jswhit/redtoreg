@@ -5,7 +5,7 @@ To test, run `python setup.py build_ext --inplace`, then `python test.py`
 but after that data will be cached data locally in `test.nc`).
 
 
-```python
+
 def redtoreg(redgrid_data, lonsperlat, missval=None):
     """
     Takes 1-d array on ECMWF reduced gaussian grid (redgrid_data), linearly interpolates to corresponding
