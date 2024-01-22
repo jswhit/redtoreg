@@ -8,10 +8,9 @@ but after that data will be cached data locally in `test.nc`).
 ```python
 def redtoreg(redgrid_data, lonsperlat, missval=None):
     """
-    redtoreg(redgrid_data, lonsperlat, missval=None)
-
     Takes 1-d array on ECMWF reduced gaussian grid (redgrid_data), interpolates to corresponding
     regular gaussian grid.  Reduced gaussian grid defined by lonsperlat array, regular gaussian
     grid has the same number of latitudes and max(lonsperlat) longitudes.
-    Includes handling of missing values using nearest neighbor interpolation."""
+    Includes handling of missing values using nearest neighbor interpolation.
+    """
 ```
