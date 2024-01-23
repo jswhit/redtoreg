@@ -25,15 +25,15 @@ def redtoreg(float_type[:] redgrid_data, long[:] lonsperlat, missval=None):
     cdef cython.Py_ssize_t i,j,indx,ilons,im,ip,nlona
     cdef float_type zxi, zdx, flons, missvalc
     if float_type is float:
-        dtype = np.float32
+        float_dtype = np.float32
     elif float_type is double:
-        dtype = np.double
+        float_dtype = np.double
+    reggrid_data = np.empty((nlats, nlons), float_dtype)
+    cdef float_type[:, ::1] reggrid_data_view = reggrid_data
     if missval is None:
         missvalc = np.nan
     else:
         missvalc = missval
-    reggrid_data = np.empty((nlats, nlons), dtype)
-    cdef float_type[:, ::1] reggrid_data_view = reggrid_data
     indx = 0
     for j in range(nlats):
         ilons = lonsperlat[j]; flons = ilons
