@@ -28,32 +28,32 @@ def redtoreg(float_type[:] redgrid_data, long[:] lonsperlat, missval=None):
         float_dtype = np.float32
     elif float_type is double:
         float_dtype = np.double
-    reggrid_data = np.empty((nlats, nlons), float_dtype)
-    cdef float_type[:, ::1] reggrid_data_view = reggrid_data
     if missval is None:
-        missvalc = np.nan
-    else:
-        missvalc = missval
+        missval = np.nan
+    missvalc = missval
+    reggrid_data = np.full((nlats, nlons), missval, float_dtype)
+    cdef float_type[:, ::1] reggrid_data_view = reggrid_data
     indx = 0
     for j in range(nlats):
         ilons = lonsperlat[j]; flons = ilons
-        for i in range(nlons):
-            # zxi is the grid index (relative to the reduced grid)
-            # of the i'th point on the full grid.
-            zxi = i * flons / nlons # goes from 0 to ilons
-            im = <cython.Py_ssize_t>zxi; zdx = zxi - im
-            im = (im + ilons)%ilons
-            ip = (im + 1 + ilons)%ilons
-            # if one of the nearest values is missing, use nearest
-            # neighbor interpolation.
-            if redgrid_data[indx+im] == missvalc or\
-               redgrid_data[indx+ip] == missvalc: 
-                if zdx < 0.5:
-                    reggrid_data_view[j,i] = redgrid_data[indx+im]
-                else:
-                    reggrid_data_view[j,i] = redgrid_data[indx+ip]
-            else: # linear interpolation.
-                reggrid_data_view[j,i] = redgrid_data[indx+im]*(1.-zdx) +\
-                                         redgrid_data[indx+ip]*zdx
-        indx = indx + ilons
+        if ilons != 0:
+            for i in range(nlons):
+                # zxi is the grid index (relative to the reduced grid)
+                # of the i'th point on the full grid.
+                zxi = i * flons / nlons # goes from 0 to ilons
+                im = <cython.Py_ssize_t>zxi; zdx = zxi - im
+                im = (im + ilons)%ilons
+                ip = (im + 1 + ilons)%ilons
+                # if one of the nearest values is missing, use nearest
+                # neighbor interpolation.
+                if redgrid_data[indx+im] == missvalc or\
+                   redgrid_data[indx+ip] == missvalc: 
+                    if zdx < 0.5:
+                        reggrid_data_view[j,i] = redgrid_data[indx+im]
+                    else:
+                        reggrid_data_view[j,i] = redgrid_data[indx+ip]
+                else: # linear interpolation.
+                    reggrid_data_view[j,i] = redgrid_data[indx+im]*(1.-zdx) +\
+                                             redgrid_data[indx+ip]*zdx
+            indx = indx + ilons
     return reggrid_data
