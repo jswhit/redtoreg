@@ -4,6 +4,8 @@ To test, run `python setup.py build_ext --inplace`, then `python test.py`
 (first time will take a while to read data from google cloud, 
 but after that data will be cached data locally in `test.nc`).
 
+Included in pygrib >= 2.1.6.
+
 
 ```
 def redtoreg(redgrid_data, lonsperlat, missval=None):
